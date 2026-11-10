@@ -99,6 +99,38 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
+@auth.route("/next-week", methods=["POST"])
+def next_week():
+    if "player_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute(
+            """
+            UPDATE players
+            SET semester_week = semester_week + 1
+            WHERE player_id = %s
+              AND semester_week < 16
+            """,
+            (session["player_id"],),
+        )
+        db.commit()
+
+        if cur.rowcount == 1:
+            flash("A new week begins! Good luck surviving college! 🎉", "success")
+        else:
+            flash("You survived all 16 weeks! You completed the semester! 🎓", "success")
+
+    finally:
+        cur.close()
+        db.close()
+
+    return redirect(url_for("auth.dashboard"))
+
+
 @auth.route("/action/<action_name>", methods=["POST"])
 def game_action(action_name):
     if "player_id" not in session:

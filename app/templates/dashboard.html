@@ -170,6 +170,29 @@
     </div>
 </div>
 
+
+    <!-- Next Week -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-3">📅 Advance to the Next Week</h4>
+            <p class="text-muted">
+                Move forward to the next week of the semester.
+            </p>
+        {% if player.semester_week < 16 %}
+            <form action="{{ url_for('auth.next_week') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary w-100 py-3">
+                    Next Week
+                </button>
+            </form>
+        {% else %}
+            <p class="text-success fw-bold">
+                🎓 Congratulations! You survived the semester!
+            </p>
+        {% endif %}
+        </div>
+    </div>
+
     <!-- Game Introduction -->
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
