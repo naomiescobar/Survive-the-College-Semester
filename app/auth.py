@@ -67,7 +67,31 @@ def login():
 def dashboard():
     if "player_id" not in session:
         return redirect(url_for("auth.login"))
-    return render_template("dashboard.html")
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    try:
+        cur.execute(
+            """
+            SELECT username, energy, money, stress, homework,
+                   attendance, semester_week
+            FROM players
+            WHERE player_id = %s
+            """,
+            (session["player_id"],),
+        )
+        player = cur.fetchone()
+    finally:
+        cur.close()
+        db.close()
+
+    if player is None:
+        session.clear()
+        flash("Please sign in again.", "warning")
+        return redirect(url_for("auth.login"))
+
+    return render_template("dashboard.html", player=player)
 
 @auth.route("/logout")
 def logout():
