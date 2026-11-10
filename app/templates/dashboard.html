@@ -233,6 +233,25 @@
         </div>
     </div>
 </div>
+
+<!-- Next Week (end the week early) -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">📅 Advance to the Next Week</h4>
+        <p class="text-muted">
+            Done for the week? Move on to the next one now.
+            Any actions you haven't used will be lost.
+        </p>
+        <form action="{{ url_for('auth.next_week') }}" method="POST"
+              onsubmit="return confirm('End the week early? Your remaining actions this week will be lost.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline-primary w-100 py-3">
+                End Week Early
+                <small class="d-block">Skip your remaining actions and move on</small>
+            </button>
+        </form>
+    </div>
+</div>
 {% endif %}
 
     <!-- Game Introduction -->

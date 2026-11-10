@@ -408,6 +408,62 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
+@auth.route("/next-week", methods=["POST"])
+def next_week():
+    """End the current week early: forfeit any unused actions and move on."""
+    if "player_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    # Players must answer a pending event before doing anything else
+    if get_pending_event(session.get("pending_event")) is not None:
+        flash("Respond to the event first!", "warning")
+        return redirect(url_for("auth.dashboard"))
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    message = None
+    category = "info"
+
+    try:
+        cur.execute(
+            "SELECT actions_left, stress, attendance FROM players WHERE player_id = %s",
+            (session["player_id"],),
+        )
+        state = cur.fetchone()
+
+        if state is None:
+            session.clear()
+            flash("Please sign in again.", "warning")
+            return redirect(url_for("auth.login"))
+
+        if get_game_over_reason(state["stress"], state["attendance"]) is not None:
+            message = "Your game is over. Reset the game to try again."
+            category = "danger"
+        elif state["actions_left"] <= 0:
+            message = "There are no actions left to skip this week."
+            category = "warning"
+        else:
+            # Forfeit the remaining actions, then roll over to the next week
+            cur.execute(
+                "UPDATE players SET actions_left = 0 WHERE player_id = %s",
+                (session["player_id"],),
+            )
+            advanced = advance_week_if_done(cur, session["player_id"])
+            db.commit()
+
+            if advanced:
+                message = "You ended the week early. A new week begins!"
+            else:
+                # Week 16 has no next week, so ending it finishes the semester
+                message = "You ended the final week early. The semester is over!"
+    finally:
+        cur.close()
+        db.close()
+
+    flash(message, category)
+    return redirect(url_for("auth.dashboard"))
+
+
 @auth.route("/action/<action_name>", methods=["POST"])
 def game_action(action_name):
     if "player_id" not in session:
