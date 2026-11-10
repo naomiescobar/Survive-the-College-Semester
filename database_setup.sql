@@ -1,4 +1,3 @@
-
 -- Survive the College Semester
 -- CSC335-02 Fall 2026
 -- Login Database Setup
@@ -21,6 +20,13 @@ CREATE TABLE IF NOT EXISTS players (
 
     -- College journey
     semester_week INT NOT NULL DEFAULT 1,
+
+    -- Weekly game state
+    -- actions_left: action points remaining this week (week ends at 0)
+    -- event_chance: percent chance a random event happens after the next action
+    actions_left INT NOT NULL DEFAULT 3,
+    event_chance INT NOT NULL DEFAULT 15,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_energy
@@ -32,7 +38,11 @@ CREATE TABLE IF NOT EXISTS players (
     CONSTRAINT chk_attendance
         CHECK (attendance BETWEEN 0 AND 100),
     CONSTRAINT chk_week
-        CHECK (semester_week BETWEEN 1 AND 16)
+        CHECK (semester_week BETWEEN 1 AND 16),
+    CONSTRAINT chk_actions
+        CHECK (actions_left >= 0),
+    CONSTRAINT chk_event_chance
+        CHECK (event_chance BETWEEN 0 AND 100)
 );
 
 -- Login lookup:
@@ -43,6 +53,7 @@ WHERE username = ?;
 
 -- Load the player's game stats after successful login.
 SELECT player_id, username, energy, money, stress,
-       homework, attendance, semester_week
+       homework, attendance, semester_week,
+       actions_left, event_chance
 FROM players
 WHERE player_id = ?;
