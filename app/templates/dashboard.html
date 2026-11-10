@@ -114,6 +114,62 @@
 
     </div>
 
+
+<!-- Game Actions -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-3">🎮 What will you do today?</h4>
+        <p class="text-muted">
+            Every decision affects your college experience.
+            Choose wisely!
+        </p>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <form action="{{ url_for('auth.game_action', action_name='study') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary w-100 py-3">
+                        📚 Study for 2 Hours
+                        <small class="d-block">Energy -15 | Homework +20 | Stress +5</small>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-md-6">
+                <form action="{{ url_for('auth.game_action', action_name='work') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-success w-100 py-3">
+                        💼 Work a Shift
+                        <small class="d-block">Energy -20 | Money +$60 | Stress +10</small>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-md-6">
+                <form action="{{ url_for('auth.game_action', action_name='sleep') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-warning w-100 py-3">
+                        😴 Get Some Sleep
+                        <small class="d-block">Energy +25 | Stress -10</small>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-md-6">
+                <form action="{{ url_for('auth.game_action', action_name='skip_class') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger w-100 py-3">
+                        🏃 Skip Class
+                        <small class="d-block">Energy +5 | Stress +5 | Attendance -15</small>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
     <!-- Game Introduction -->
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">

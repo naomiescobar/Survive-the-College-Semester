@@ -97,3 +97,61 @@ def dashboard():
 def logout():
     session.clear()
     return redirect(url_for("auth.login"))
+
+
+@auth.route("/action/<action_name>", methods=["POST"])
+def game_action(action_name):
+    if "player_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    actions = {
+        "study": (-15, 0, 5, 20, 0),
+        "work": (-20, 60, 10, 0, 0),
+        "sleep": (25, 0, -10, 0, 0),
+        "skip_class": (5, 0, 5, 0, -15),
+    }
+
+    messages = {
+        "study": "You studied for 2 hours. Your homework improved!",
+        "work": "You completed a work shift and earned $60!",
+        "sleep": "You got some rest. Your energy recovered!",
+        "skip_class": "You skipped class. Your attendance suffered!",
+    }
+
+    if action_name not in actions:
+        flash("Invalid game action.", "danger")
+        return redirect(url_for("auth.dashboard"))
+
+    energy, money, stress, homework, attendance = actions[action_name]
+
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute(
+            """
+            UPDATE players
+            SET
+                energy = GREATEST(0, LEAST(100, energy + %s)),
+                money = GREATEST(0, money + %s),
+                stress = GREATEST(0, LEAST(100, stress + %s)),
+                homework = GREATEST(0, LEAST(100, homework + %s)),
+                attendance = GREATEST(0, LEAST(100, attendance + %s))
+            WHERE player_id = %s
+            """,
+            (
+                energy,
+                money,
+                stress,
+                homework,
+                attendance,
+                session["player_id"],
+            ),
+        )
+        db.commit()
+    finally:
+        cur.close()
+        db.close()
+
+    flash(messages[action_name], "success")
+    return redirect(url_for("auth.dashboard"))
